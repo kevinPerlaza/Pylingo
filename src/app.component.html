@@ -1,0 +1,33 @@
+
+<div class="min-h-screen text-slate-800 dark:text-slate-200">
+  <header class="bg-white dark:bg-slate-800 shadow-md p-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <svg class="w-10 h-10 text-emerald-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.33 3.03C8.65 3.03 6.5 5.17 6.5 7.86C6.5 9.49 7.23 10.95 8.38 11.9L3.5 19.5H5.5L9.31 13.38C9.98 13.56 10.64 13.68 11.33 13.68C14 13.68 16.15 11.54 16.15 8.85C16.15 6.17 14 4.03 11.33 4.03V3.03ZM11.33 5.03C13.45 5.03 15.15 6.74 15.15 8.85C15.15 10.96 13.45 12.68 11.33 12.68C10.11 12.68 9.04 12.16 8.31 11.33C8.81 8.65 10.21 6.55 11.33 5.03Z" /><path d="M12.67 20.97C15.35 20.97 17.5 18.83 17.5 16.14C17.5 14.51 16.77 13.05 15.62 12.1L20.5 4.5H18.5L14.69 10.62C14.02 10.44 13.36 10.32 12.67 10.32C10 10.32 7.85 12.46 7.85 15.15C7.85 17.83 10 19.97 12.67 19.97V20.97ZM12.67 18.97C10.55 18.97 8.85 17.26 8.85 15.15C8.85 13.04 10.55 11.32 12.67 11.32C13.89 11.32 14.96 11.84 15.69 12.67C15.19 15.35 13.79 17.45 12.67 18.97Z" /></svg>
+      <h1 class="text-2xl font-extrabold text-emerald-500">PyLingo</h1>
+    </div>
+    @if (currentUser()) {
+      <div class="flex items-center space-x-4">
+        <span class="font-bold text-slate-600 dark:text-slate-300">¡Bienvenido, {{ currentUser()?.email.split('@')[0] }}!</span>
+        <button (click)="logout()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+          Cerrar Sesión
+        </button>
+      </div>
+    }
+  </header>
+
+  <main class="p-4 md:p-8">
+    @switch (view()) {
+      @case ('login') {
+        <app-login (loginSuccess)="onLoginSuccess($event)"></app-login>
+      }
+      @case ('home') {
+        <app-home (startLesson)="onStartLesson($event)"></app-home>
+      }
+      @case ('lesson') {
+        @if (currentLesson(); as lesson) {
+          <app-lesson [lesson]="lesson" (lessonComplete)="onLessonComplete($event)" (exitLesson)="onExitLesson()"></app-lesson>
+        }
+      }
+    }
+  </main>
+</div>

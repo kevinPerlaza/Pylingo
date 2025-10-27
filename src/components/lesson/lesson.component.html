@@ -1,0 +1,122 @@
+<div class="max-w-3xl mx-auto">
+  <!-- Header and Progress Bar -->
+  <div class="mb-6">
+    <div class="flex justify-between items-center mb-2">
+       <button (click)="exitLesson.emit()" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <h2 class="text-xl font-bold text-slate-600 dark:text-slate-300">{{ lesson().title }}</h2>
+      <div class="w-8"></div>
+    </div>
+    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-4">
+      <div class="bg-emerald-500 h-4 rounded-full transition-all duration-500" [style.width.%]="progressPercentage"></div>
+    </div>
+  </div>
+
+  <!-- Lesson Content -->
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 min-h-[400px] flex flex-col justify-between">
+    @let step = currentStep;
+    @if (step.type === 'explanation') {
+      <div>
+        <h3 class="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-4">{{ step.title }}</h3>
+        <p class="text-lg text-slate-600 dark:text-slate-300 mb-4">{{ step.content }}</p>
+        @if (step.code) {
+          <pre class="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 text-left text-sm font-mono overflow-x-auto"><code class="text-slate-800 dark:text-slate-200">{{ step.code }}</code></pre>
+        }
+      </div>
+    } @else if (isQuestion(step)) {
+      <div>
+        <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">{{ step.question }}</h3>
+         @if (step.code) {
+          <pre class="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 text-left text-sm font-mono mb-6 overflow-x-auto"><code class="text-slate-800 dark:text-slate-200">{{ step.code }}</code></pre>
+        }
+        <div class="space-y-3">
+          @for (option of step.options; track option) {
+            <button (click)="selectAnswer(option)" 
+                    class="w-full text-left p-4 rounded-lg border-2 transition-all"
+                    [class.bg-sky-100]="selectedAnswer() === option && answerStatus() === 'unanswered'"
+                    [class.dark:bg-sky-900]="selectedAnswer() === option && answerStatus() === 'unanswered'"
+                    [class.border-sky-400]="selectedAnswer() === option && answerStatus() === 'unanswered'"
+                    [class.border-slate-300]="selectedAnswer() !== option"
+                    [class.dark:border-slate-600]="selectedAnswer() !== option"
+                    [class.hover:bg-slate-100]="answerStatus() === 'unanswered'"
+                    [class.dark:hover:bg-slate-700]="answerStatus() === 'unanswered'"
+                    [class.cursor-default]="answerStatus() !== 'unanswered'"
+
+                    [class.bg-emerald-100]="answerStatus() !== 'unanswered' && option === step.correctAnswer"
+                    [class.dark:bg-emerald-900]="answerStatus() !== 'unanswered' && option === step.correctAnswer"
+                    [class.border-emerald-500]="answerStatus() !== 'unanswered' && option === step.correctAnswer"
+
+                    [class.bg-red-100]="selectedAnswer() === option && answerStatus() === 'incorrect'"
+                    [class.dark:bg-red-900]="selectedAnswer() === option && answerStatus() === 'incorrect'"
+                    [class.border-red-500]="selectedAnswer() === option && answerStatus() === 'incorrect'"
+                    >
+              {{ option }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Footer / Action bar -->
+    @if (answerStatus() === 'unanswered') {
+      <div class="mt-8 border-t-2 border-slate-200 dark:border-slate-700 pt-6 flex justify-between items-center">
+        <button (click)="goBack()" [disabled]="currentStepIndex() === 0" class="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-slate-200 font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100">
+          Volver
+        </button>
+        @if (currentStep.type === 'explanation') {
+           <button (click)="continue()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+            Continuar
+          </button>
+        } @else {
+           <button (click)="checkAnswer()" [disabled]="!selectedAnswer()" class="bg-emerald-500 text-white font-extrabold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed disabled:scale-100">
+            Verificar
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="mt-8 pt-6" 
+          [class.bg-emerald-100]="answerStatus() === 'correct'"
+          [class.dark:bg-emerald-900]="answerStatus() === 'correct'"
+          [class.text-emerald-700]="answerStatus() === 'correct'"
+          [class.dark:text-emerald-200]="answerStatus() === 'correct'"
+          [class.bg-red-100]="answerStatus() === 'incorrect'"
+          [class.dark:bg-red-900]="answerStatus() === 'incorrect'"
+          [class.text-red-700]="answerStatus() === 'incorrect'"
+          [class.dark:text-red-200]="answerStatus() === 'incorrect'"
+          >
+        <div class="px-6 flex items-center justify-between">
+          <div class="flex items-center">
+            @if(answerStatus() === 'correct') {
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <h4 class="font-bold text-xl">¡Correcto!</h4>
+            } @else {
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              <h4 class="font-bold text-xl">Incorrecto. ¡Inténtalo de nuevo!</h4>
+            }
+          </div>
+          <div class="flex items-center space-x-4">
+            <button (click)="goBack()" [disabled]="currentStepIndex() === 0" class="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-slate-200 font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100">
+              Volver
+            </button>
+            <button (click)="continue()" 
+                    class="text-white font-extrabold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105"
+                    [class.bg-emerald-500]="answerStatus() === 'correct'"
+                    [class.hover:bg-emerald-600]="answerStatus() === 'correct'"
+                    [class.bg-red-500]="answerStatus() === 'incorrect'"
+                    [class.hover:bg-red-600]="answerStatus() === 'incorrect'"
+                    >
+              Continuar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

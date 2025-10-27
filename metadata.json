@@ -1,0 +1,5 @@
+{
+  "name": "PyLingo: Aprende Python",
+  "description": "Una aplicación interactiva, estilo Duolingo, para aprender a programar en Python, desde conceptos básicos hasta temas más avanzados. Sigue tu progreso y aprende a tu propio ritmo.",
+  "requestFramePermissions": []
+}
